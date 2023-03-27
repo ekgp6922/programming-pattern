@@ -1,7 +1,14 @@
 #include <iostream>
-
 int main()
-{
-	std::cout<<"아 배고푸당 ㅠㅜ"<<std::endl;
+{	while(1)
+	{
+			std::cout<<"*";
+			if(kbhit())
+			{
+					std::cout<<"snffla";
+					if(getch()==27)
+						break;
+			}
+	}
 	return 0;
 }
