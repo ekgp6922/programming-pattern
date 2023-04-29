@@ -1,55 +1,109 @@
-/*#define _Is_THIS_HEADER_INCLUDED ∞∞¿∫ ¿«πÃ¿« µ∆ƒ¿ŒπÆ*/
-#pragma once //once : ¥‹ «—π¯∏∏ ƒƒ∆ƒ¿œ «ÿ∂Û
+#pragma once 
 #include <iostream>
 #include <conio.h>
+#include <Windows.h>
+
+#define ANSI_COLOR_RED      "\x1b[31m"
+#define ANSI_COLOR_GREEN    "\x1b[32m"
+#define ANSI_COLOR_YELLOW   "\x1b[33m"
+#define ANSI_COLOR_BLUE     "\x1b[34m"
+#define ANSI_COLOR_MAGENTA  "\x1b[35m"
+#define ANSI_COLOR_CYAN     "\x1b[36m"
+#define ANSI_COLOR_RESET    "\x1b[0m"
+
+#define KEY_ESC 27
+#define KEY_LEFT 'a'
+#define KEY_RIGHT 'd'
+#define KEY_ENTER 13
+#define KEY_YES 'y'
+#define KEY_NO 'n'
 
 
-namespace Musoeun //∞‘¿” ∑Á«¡ ∏∏µÈ±‚
+
+
+namespace MuSoeun
 {
+	void gotoxy(int x, int y) {
+		//x, y Ï¢åÌëú ÏÑ§Ï†ï
+		COORD pos = { x,y };
+		//Ïª§ÏÑú Ïù¥Îèô
+		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
+	}
+
+	void SetCursorState(bool visible)
+	{
+		CONSOLE_CURSOR_INFO consoleCursorInfo;
+		consoleCursorInfo.bVisible = visible;
+		consoleCursorInfo.dwSize = 1;
+		SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &consoleCursorInfo);
+	}
+
+
 	class MGameLoop
 	{
 	public:
-
-		bool isGameRunning = false;
 		MGameLoop() {}
 		~MGameLoop() {}
+		char key_input = 0;
+
+		bool isGameRunning = false;
 
 		void Initialize()
 		{
-			isGameRunning = true;
-			std::cout << "√ ±‚»≠ øœ∑·" << std::endl;
-		}
+			SetCursorState(false);
 
+			gotoxy(3, 15);
+			std::cout << ANSI_COLOR_RESET"Í≤åÏûÑ Ï¥àÍ∏∞ÌôîÏ§ë" << std::endl;
+			isGameRunning = true;
+		}
 		void Release()
 		{
-			std::cout << "Ω√Ω∫≈€ «ÿ¡¶ øœ∑·" << std::endl;
+			gotoxy(3, 18);
+			std::cout << ANSI_COLOR_RESET"Í≤åÏûÑ Ï¢ÖÎ£åÏ§ë" << std::endl;
 		}
-
 		void Update()
 		{
-			std::cout << "æ˜µ•¿Ã∆Æ ¡ﬂ  øœ∑·" << std::endl;
+			gotoxy(3, 16);
+			std::cout << ANSI_COLOR_RESET"Í≤åÏûÑ ÌÇ§ÏûÖÎ†• ÎåÄÍ∏∞" << std::endl;
 			if (_kbhit())
-			{	
-				KeyEvent(_getch());
-
-			}
-			/*char a;
-			a = getchar();
-			if (a == '1')
 			{
-				isGameRunning = false;
-			}*/
+				KeyEvent(_getch());
+			}
 		}
-
 		void Render()
 		{
-			std::cout << "∑ª¥ı∏µ øœ∑·" << std::endl;
+			gotoxy(3, 17);
+			std::cout << ANSI_COLOR_RESET"Í≤åÏûÑ ÌôîÎ©¥ Í∑∏Î¶¨Í∏∞" << std::endl;
+		}
+
+		void Qt()
+		{
+			gotoxy(8, 8);
+			std::cout << ANSI_COLOR_RESET"Ï¢ÖÎ£å ÌïòÏãúÍ≤†ÏäµÎãàÍπå? \n\n" << std::endl;
+			gotoxy(6, 10);
+			std::cout << ANSI_COLOR_RESET" [  Ïòà  ]    [ÏïÑÎãàÏò§] " << std::endl;
+			key_input = _getch();
+			
+
+		}
+		void YEnter()
+		{
+			if (KEY_ENTER)
+			{
+				isGameRunning = false;
+			}
+		}
+		void NEnter()
+		{
+			if (KEY_ENTER)
+			{
+				isGameRunning = true;
+			}
 		}
 
 		void Run()
 		{
 			Initialize();
-
 			while (isGameRunning)
 			{
 				Update();
@@ -57,28 +111,45 @@ namespace Musoeun //∞‘¿” ∑Á«¡ ∏∏µÈ±‚
 			}
 			Release();
 		}
-		void KeyEvent(char keyInput)
+
+		void KeyEvent(char KeyInput)
 		{
-			int a, b;
-			switch (keyInput)
+			switch (KeyInput)
 			{
-			case 'a': //øﬁ¬  »≠ªÏ«•
-				a = 0;
+				/* ÌïúÎ≤à ESCÎàÑÎ•¥Î©¥ ÏùºÏãú Ï†ïÏßÄÍ∞Ä ÎêòÍ≥†
+				 * Ïó¨Í∏∞ÏÑú ÎÇòÍ∞ÄÍ∏∞Î•º ÏÑ†ÌÉùÌïòÎ©¥ ÎÇòÍ∞ÄÏßÑÎã§			 *
+				 */
+			case KEY_ESC:
+				/*isGameRunning = false;*/
+				Qt();
 				break;
-			case 'd'://ø¿∏•¬  »≠ªÏ«•
-				b = 0;
+			case KEY_LEFT:
+				gotoxy(5, 5);
+				std::cout << ANSI_COLOR_RED"ÏôºÏ™Ω ÎàåÎ¶º  " << std::endl;
 				break;
-			case '27':
-				//27 : esc≈∞∞Ì ∞‘¿” ¡æ∑·≈∞ ¿‘¥œ¥Ÿ. / «—π¯ ¥≠∑∂¿ª ∂ß ¿œΩ√ ¡§¡ˆ / µŒπ¯ ¥≠∑∂¿ª Ω√ ∞‘¿”¡æ∑·
-				isGameRunning = false;
-				//24¿œ 8¡÷¬˜ ∞˙¡¶
-
-				std::cout << "¡§∏ª ∞‘¿”¿ª ¡æ∑· «œΩ√∞⁄Ω¿¥œ±Ó?" << std::endl;
-
+			case KEY_RIGHT:
+				gotoxy(5, 5);
+				std::cout << ANSI_COLOR_GREEN"Ïò§Î•∏Ï™Ω ÎàåÎ¶º" << std::endl;
+				break;
+			case KEY_ENTER:
+				gotoxy(5, 5);
+				std::cout << ANSI_COLOR_BLUE"ÏóîÌÑ∞ ÎàåÎ¶º  " << std::endl;
+				break;
+			case KEY_YES:
+				gotoxy(5, 10);
+				std::cout << ANSI_COLOR_YELLOW"  [  Ïòà  ] " << std::endl;
+				YEnter();
+				break;
+			case KEY_NO:
+				gotoxy(15, 10);
+				std::cout << ANSI_COLOR_YELLOW"    [ÏïÑÎãàÏò§]" << std::endl;
+				NEnter();
 				break;
 			default:
+				isGameRunning = true;
 				break;
 			}
 		}
 	};
+
 }
