@@ -1,0 +1,148 @@
+#include <iostream>
+#include <conio.h>
+#include <windows.h>
+
+using namespace std;
+
+const int FIELD_WIDTH = 20;
+const int FIELD_HEIGHT = 20;
+
+bool gameOver;
+int snakeX[100], snakeY[100];
+int snakeLength;
+int fruitX, fruitY;
+int score;
+int dirX, dirY;
+
+enum Direction { STOP = 0, LEFT, RIGHT, UP, DOWN };
+Direction dir;
+
+void Setup() {
+    gameOver = false;
+    dir = STOP;
+    snakeX[0] = FIELD_WIDTH / 2;
+    snakeY[0] = FIELD_HEIGHT / 2;
+    snakeLength = 1;
+    fruitX = rand() % (FIELD_WIDTH - 2) + 1;
+    fruitY = rand() % (FIELD_HEIGHT - 2) + 1;
+    score = 0;
+    dirX = 0;
+    dirY = 0;
+}
+
+void PrintField() {
+    system("cls");
+    for (int i = 0; i < FIELD_HEIGHT; i++) {
+        for (int j = 0; j < FIELD_WIDTH; j++) {
+            if (i == 0 || i == FIELD_HEIGHT - 1 || j == 0 || j == FIELD_WIDTH - 1) {
+                cout << "#";
+            }
+            else {
+                bool isSnakeBodyPart = false;
+                for (int k = 0; k < snakeLength; k++) {
+                    if (snakeX[k] == j && snakeY[k] == i) {
+                        isSnakeBodyPart = true;
+                        break;
+                    }
+                }
+                if (isSnakeBodyPart) {
+                    cout << "O";
+                }
+                else if (j == fruitX && i == fruitY) {
+                    cout << "F";
+                }
+                else {
+                    cout << " ";
+                }
+            }
+        }
+        cout << endl;
+    }
+}
+
+void Input() {
+    if (_kbhit()) {
+        switch (_getch()) {
+        case 'a':
+            dir = LEFT;
+            break;
+        case 'd':
+            dir = RIGHT;
+            break;
+        case 'w':
+            dir = UP;
+            break;
+        case 's':
+            dir = DOWN;
+            break;
+        case 'x':
+            gameOver = true;
+            break;
+        }
+    }
+}
+
+void Logic() {
+    int prevX = snakeX[0];
+    int prevY = snakeY[0];
+    int prev2X, prev2Y;
+    snakeX[0] += dirX;
+    snakeY[0] += dirY;
+
+    for (int i = 1; i < snakeLength; i++) {
+        prev2X = snakeX[i];
+        prev2Y = snakeY[i];
+        snakeX[i] = prevX;
+        snakeY[i] = prevY;
+        prevX = prev2X;
+        prevY = prev2Y;
+    }
+
+    switch (dir) {
+    case LEFT:
+        dirX = -1;
+        dirY = 0;
+        break;
+    case RIGHT:
+        dirX = 1;
+        dirY = 0;
+        break;
+    case UP:
+        dirX = 0;
+        dirY = -1;
+        break;
+    case DOWN:
+        dirX = 0;
+        dirY = 1;
+        break;
+    }
+
+    if (snakeX[0] == fruitX && snakeY[0] == fruitY) {
+        score += 10;
+        fruitX = rand() % (FIELD_WIDTH - 2) + 1;
+        fruitY = rand() % (FIELD_HEIGHT - 2) + 1;
+        snakeLength++;
+    }
+
+    if (snakeX[0] == 0 || snakeX[0] == FIELD_WIDTH - 1 || snakeY[0] == 0 || snakeY[0] == FIELD_HEIGHT - 1) {
+        gameOver = true;
+    }
+
+    for (int i = 1; i < snakeLength; i++) {
+        if (snakeX[0] == snakeX[i] && snakeY[0] == snakeY[i]) {
+            gameOver = true;
+        }
+    }
+}
+
+int main() {
+    Setup();
+    while (!gameOver) {
+        PrintField();
+        Input();
+        Logic();
+        Sleep(10); // 게임 속도 조절을 위한 지연
+    }
+    cout << "게임 오버! 점수: " << score << endl;
+    return 0;
+}
