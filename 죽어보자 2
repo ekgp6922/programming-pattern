@@ -1,0 +1,410 @@
+
+#define GAME_H
+
+#include <iostream>
+#include <conio.h>
+#include <windows.h>
+#include <vector>
+
+
+
+#define KEY_ESC 27 //아스키코드를 ESC로 정의
+#define KEY_LEFT 'a'
+#define KEY_RIGHT 'd'
+#define KEY_UP 'w'
+#define KEY_DOWN 's'
+#define KEY_ENTER 13 
+
+//색 코드(외울 필요 없음)
+#define ANSI_COLOR_RED      "\x1b[31m" //바로 앞 문자열에 반영된다.
+#define ANSI_COLOR_GREEN    "\x1b[32m"
+#define ANSI_COLOR_YELLOW   "\x1b[33m"
+#define ANSI_COLOR_BLUE     "\x1b[34m"
+#define ANSI_COLOR_MAGENTA  "\x1b[35m"
+#define ANSI_COLOR_CYAN     "\x1b[36m"
+#define ANSI_COLOR_RESET    "\x1b[0m"
+using namespace std;
+
+const int FIELD_WIDTH = 30;
+const int FIELD_HEIGHT = 30;
+
+bool see;
+bool gameOver;
+int snakeX[100], snakeY[100];
+int snakeLength;
+int fruitX, fruitY;
+int score;
+int dirX, dirY;
+
+enum Direction { STOP = 0, LEFT, RIGHT, UP, DOWN };
+Direction dir;
+
+void Setup() {
+	gameOver = false;
+	dir = STOP;
+	snakeX[0] = FIELD_WIDTH / 2;
+	snakeY[0] = FIELD_HEIGHT / 2;
+	snakeLength = 1;
+	fruitX = rand() % (FIELD_WIDTH - 2) + 1;
+	fruitY = rand() % (FIELD_HEIGHT - 2) + 1;
+	score = 0;
+	dirX = 0;
+	dirY = 0;
+}
+void print_title_screen()
+{
+	std::cout << "****************************************" << std::endl;
+	std::cout << "*                                      *" << std::endl;
+	std::cout << "*                                      *" << std::endl;
+	std::cout << "*             지렁이 게임              *" << std::endl;
+	std::cout << "*            (Snake Bite)              *" << std::endl;
+	std::cout << "*                                      *" << std::endl;
+	std::cout << "*            1. 게임 시작              *" << std::endl;
+	std::cout << "*            2. 게임 설명              *" << std::endl;
+	std::cout << "*            3. 게임 랭킹 보기         *" << std::endl;
+	std::cout << "*            4. 게임 종료 (esc)        *" << std::endl;
+	std::cout << "*                                      *" << std::endl;
+	std::cout << "****************************************" << std::endl;
+}
+int introduction_screen()
+{
+	std::cout << ANSI_COLOR_RESET"******************************************" << std::endl;
+	std::cout << ANSI_COLOR_RESET"*         게임 설명화면입니다.           *" << std::endl;
+	std::cout << ANSI_COLOR_RESET"*         게임 설명은 안할겁니다.        *" << std::endl;
+	std::cout << ANSI_COLOR_RESET"******************************************" << std::endl;
+	std::cout << ANSI_COLOR_RESET"*   타이틀화면으로 돌아갈까요? (Y/N)     *" << std::endl;
+	std::cout << ANSI_COLOR_RESET"******************************************" << std::endl;
+	return 0;
+}
+void PrintField() {
+	
+		system("cls");
+		for (int i = 0; i < FIELD_HEIGHT; i++) {
+			for (int j = 0; j < FIELD_WIDTH; j++) {
+				if (i == 0 || i == FIELD_HEIGHT - 1 || j == 0 || j == FIELD_WIDTH - 1) {
+					cout << ANSI_COLOR_RESET  "|";
+
+				}
+				else {
+					bool isSnakeBodyPart = false;
+					for (int k = 0; k < snakeLength; k++) {
+						if (snakeX[k] == j && snakeY[k] == i) {
+							isSnakeBodyPart = true;
+							break;
+						}
+					}
+					if (isSnakeBodyPart) {
+						cout << ANSI_COLOR_CYAN "o";
+						
+						
+					}
+					else if (j == fruitX && i == fruitY) {
+						cout << ANSI_COLOR_YELLOW "$";
+					}
+					else {
+						cout << " ";
+					}
+				}
+			}
+			cout << endl;
+		}
+
+}
+
+void Input() {
+	if (_kbhit()) {
+		switch (_getch()) {
+		case 'a':
+			dir = LEFT;
+			break;
+		case 'd':
+			dir = RIGHT;
+			break;
+		case 'w':
+			dir = UP;
+			break;
+		case 's':
+			dir = DOWN;
+			break;
+		case 'x':
+			gameOver = true;
+			break;
+		}
+	}
+}
+
+void Logic() {
+	int prevX = snakeX[0];
+	int prevY = snakeY[0];
+	int prev2X, prev2Y;
+	snakeX[0] += dirX;
+	snakeY[0] += dirY;
+
+	for (int i = 1; i < snakeLength; i++) {
+		prev2X = snakeX[i];
+		prev2Y = snakeY[i];
+		snakeX[i] = prevX;
+		snakeY[i] = prevY;
+		prevX = prev2X;
+		prevY = prev2Y;
+	}
+
+	switch (dir) {
+	case LEFT:
+		dirX = -1;
+		dirY = 0;
+		break;
+	case RIGHT:
+		dirX = 1;
+		dirY = 0;
+		break;
+	case UP:
+		dirX = 0;
+		dirY = -1;
+		break;
+	case DOWN:
+		dirX = 0;
+		dirY = 1;
+		break;
+	}
+
+	if (snakeX[0] == fruitX && snakeY[0] == fruitY) {
+		score += 10;
+		fruitX = rand() % (FIELD_WIDTH - 2) + 1;
+		fruitY = rand() % (FIELD_HEIGHT - 2) + 1;
+		snakeLength++;
+	}
+
+	if (snakeX[0] == 0 || snakeX[0] == FIELD_WIDTH - 1 || snakeY[0] == 0 || snakeY[0] == FIELD_HEIGHT - 1) {
+		gameOver = true;
+	}
+
+	for (int i = 1; i < snakeLength; i++) {
+		if (snakeX[0] == snakeX[i] && snakeY[0] == snakeY[i]) {
+			gameOver = true;
+		}
+	}
+}
+
+void Gotoxy(int x, int y)
+{
+	//x, y 좌표 설정
+	COORD pos = { x,y };
+	//커서 이동
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
+}
+
+void start_game()
+{
+	int game_state = 0;
+	int mod_r = 1;
+	bool isYesSelected = true;
+	int isgamerunning = 1;
+	int width, height;
+
+	std::cout << "안녕 난 벌레(김다혜)" << std::endl;
+}
+
+int main() {
+	int game_state = 0; //게임 스테이지
+	int isgamerunning = 1; //게임 종료
+	int mod_r = 1; //아무 키를 입력 받지 못하게 하는 코드
+	bool isYesSelected = true;
+
+
+	while (isgamerunning)
+	{
+		char key_input = 0;
+		switch (game_state)
+		{
+		case 0:
+			if (mod_r)
+			{
+				print_title_screen();
+				// scene의 screenBuf에 타이틀 화면 저장
+			}
+
+			key_input = _getch();
+
+			mod_r = 0;
+
+			switch (key_input)
+			{
+			case '1':
+				start_game();
+				Setup();
+				while (!gameOver) {
+					see = 1;
+					PrintField();
+					Input();
+					Logic();
+					Sleep(50); //
+				}see = 0;
+				std::cout << "                                                           " << std::endl;
+				cout << "게임 오버!\n\n점수: " << score << endl;
+				std::cout << ANSI_COLOR_YELLOW "         \n\n\n\n 타이틀로 돌아갑니다.\n\n         ";
+				std::cout << ANSI_COLOR_RESET "\n\n";
+
+				print_title_screen();
+
+				break;
+			case '2':
+				std::cout << "이 게임은 다혜가 밤세가면서 만들고있는 다혜야 죽어라입니다." << std::endl;
+				std::cout << "                                                           " << std::endl;
+				std::cout << "                        <게임 룰>                          " << std::endl;
+				std::cout << "                                                           " << std::endl;
+				std::cout << "       1. 지렁이를 WASD키를 이용하여 움직이셔요            " << std::endl;
+				std::cout << "       2. 밥을 먹으면 10점을 획득하며 지렁이가 길어져요!   " << std::endl;
+				std::cout << "       3. 지렁이는 자신의 몸과 벽에 부딪히면 안돼요        " << std::endl;
+				std::cout << "       4. 게임시간은 15초!                                 " << std::endl;
+				std::cout << "                                                           " << std::endl;
+				std::cout <<ANSI_COLOR_YELLOW "          15초동안 최대한 지렁이를 늘려보아요!             " << std::endl;
+				std::cout << ANSI_COLOR_YELLOW "             나의 최고기록을 갱신해 보아요!               " << std::endl;
+
+				break;
+			case '3':
+				std::cout << ANSI_COLOR_RESET "" << std::endl;
+				std::cout << ANSI_COLOR_RESET "" << std::endl;
+				std::cout << ANSI_COLOR_RESET "" << std::endl;
+				std::cout <<"                 추후 업데이트예정                        " << std::endl;
+				std::cout << ANSI_COLOR_RESET "" << std::endl;
+				break;
+			case '4':
+				if (key_input == '4')
+				{
+					isYesSelected = true;
+					mod_r = 0; //아무 키를 입력 받지 못하게 하는 코드
+					//게임 종료
+					Gotoxy(5, 100);
+					std::cout << ANSI_COLOR_RESET "종료하시겠습니까?" << std::endl;
+					Gotoxy(5, 101);
+					std::cout << ANSI_COLOR_YELLOW "[예]" << std::endl;
+					Gotoxy(15, 101);
+					std::cout << ANSI_COLOR_RESET "[아니오]  " << std::endl;
+
+					while (true) // ESC를 눌러서 나갈 때까지 반복한다.
+					{
+						if (_kbhit()) //키 입력 받기
+						{
+							char key = _getch();
+
+							if (key == KEY_LEFT || key == KEY_RIGHT) // 'a' 또는 'd'가 입력되면 선택된 메뉴를 변경한다.
+							{
+								isYesSelected = !isYesSelected;
+
+								// 선택된 메뉴에 따라 노란색 또는 기본 색상으로 출력한다.
+								if (isYesSelected)
+								{
+									Gotoxy(5, 101);
+									std::cout << ANSI_COLOR_YELLOW "[예]  ";
+									Gotoxy(15, 101);
+									std::cout << ANSI_COLOR_RESET "[아니오]  ";
+								}
+								else
+								{
+									Gotoxy(5, 101);
+									std::cout << ANSI_COLOR_RESET "[예]  ";
+									Gotoxy(15, 101);
+									std::cout << ANSI_COLOR_YELLOW "[아니오]  ";
+								}
+							}
+							else if (key == KEY_ENTER) // Enter가 입력되면 선택된 메뉴에 따라 종료하거나 게임을 계속 실행한다.
+							{
+								if (isYesSelected)
+								{
+									isgamerunning = false;
+									break;
+								}
+								else
+								{
+									Gotoxy(5, 100);
+									std::cout << "                     " << std::endl; //종료 메시지 지우기
+									Gotoxy(5, 101);
+									std::cout << "     " << std::endl; //선택 메뉴 지우기
+									Gotoxy(15, 101);
+									std::cout << "        " << std::endl;
+									isgamerunning = true;
+									break; //반복문 종료
+									print_title_screen();
+								}
+							}
+						}
+					}
+				}
+				break;
+			case 27:
+				if (key_input == KEY_ESC)
+				{
+					isYesSelected = true;
+					mod_r = 0; //아무 키를 입력 받지 못하게 하는 코드
+					//게임 종료
+					Gotoxy(5, 100);
+					std::cout << ANSI_COLOR_RESET "종료하시겠습니까?" << std::endl;
+					Gotoxy(5, 101);
+					std::cout << ANSI_COLOR_YELLOW "[예]" << std::endl;
+					Gotoxy(15, 101);
+					std::cout << ANSI_COLOR_RESET "[아니오]  " << std::endl;
+
+					while (true) // ESC를 눌러서 나갈 때까지 반복한다.
+					{
+						if (_kbhit()) //키 입력 받기
+						{
+							char key = _getch();
+
+							if (key == KEY_LEFT || key == KEY_RIGHT) // 'a' 또는 'd'가 입력되면 선택된 메뉴를 변경한다.
+							{
+								isYesSelected = !isYesSelected;
+
+								// 선택된 메뉴에 따라 노란색 또는 기본 색상으로 출력한다.
+								if (isYesSelected)
+								{
+									Gotoxy(5, 101);
+									std::cout << ANSI_COLOR_YELLOW "[예]  ";
+									Gotoxy(15, 101);
+									std::cout << ANSI_COLOR_RESET "[아니오]  ";
+								}
+								else
+								{
+									Gotoxy(5, 101);
+									std::cout << ANSI_COLOR_RESET "[예]  ";
+									Gotoxy(15, 101);
+									std::cout << ANSI_COLOR_YELLOW "[아니오]  ";
+								}
+							}
+							else if (key == KEY_ENTER) // Enter가 입력되면 선택된 메뉴에 따라 종료하거나 게임을 계속 실행한다.
+							{
+								if (isYesSelected)
+								{
+									isgamerunning = false;
+									break;
+								}
+								else
+								{
+									Gotoxy(5, 100);
+									std::cout << "                     " << std::endl; //종료 메시지 지우기
+									Gotoxy(5, 101);
+									std::cout << "     " << std::endl; //선택 메뉴 지우기
+									Gotoxy(15, 101);
+									std::cout << "        " << std::endl;
+									isgamerunning = true;
+									//반복문 종료
+									std::cout << ANSI_COLOR_RESET "타이틀로 돌아갑니다.\n\n";
+									print_title_screen();
+
+									break;
+								}
+							}
+						}
+					}
+				}
+				break;
+			default:
+				break;
+			}
+			break;
+		}
+	}
+
+	return 0;
+
+}
