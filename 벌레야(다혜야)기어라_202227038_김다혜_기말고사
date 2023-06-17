@@ -25,7 +25,7 @@
 #define ANSI_COLOR_RESET    "\x1b[0m"
 using namespace std;
 
-const int FIELD_WIDTH = 20;
+const int FIELD_WIDTH = 40;
 const int FIELD_HEIGHT = 20;
 
 bool see;
@@ -53,12 +53,15 @@ void Setup() {
 }
 void print_title_screen()
 {
+
     std::cout << "****************************************" << std::endl;
     std::cout << "*                                      *" << std::endl;
     std::cout << "*                                      *" << std::endl;
-    std::cout << "*             지렁이 게임              *" << std::endl;
-    std::cout << "*            (Snake Bite)              *" << std::endl;
+    std::cout << "*             벌레야 기어라            *" << std::endl;
+    std::cout << "*            (다혜야 기어라)           *" << std::endl;
     std::cout << "*                                      *" << std::endl;
+	std::cout << "*                                      *" << std::endl;
+	std::cout << "*                                      *" << std::endl;
     std::cout << "*            1. 게임 시작              *" << std::endl;
     std::cout << "*            2. 게임 설명              *" << std::endl;
     std::cout << "*            3. 게임 랭킹 보기         *" << std::endl;
@@ -96,7 +99,7 @@ void PrintField() {
 						cout << ANSI_COLOR_MAGENTA "0";
 					}
 					else if (j == fruitX && i == fruitY) {
-						cout << ANSI_COLOR_YELLOW  "F";
+						cout << ANSI_COLOR_YELLOW  "A";
 					}
 					else {
 						cout << " ";
@@ -242,7 +245,7 @@ int main() {
 					Logic();
 					Sleep(10); // 게임 속도 조절을 위한 지연
 				}see = 0;
-				cout << "게임 오버! 점수: " << score << endl;
+				cout << "\n\n하하하 어디서 당신같이 그지 같은 코드를 짜온겁니까 댁은 F입니다. \n\n" "게임 오버! 점수: " << score << endl;
 				std::cout << ANSI_COLOR_YELLOW "타이틀로 돌아갑니다.\n\n";
 				std::cout << ANSI_COLOR_RESET "\n\n";
 				
@@ -332,6 +335,7 @@ int main() {
 					std::cout << ANSI_COLOR_YELLOW "[예]" << std::endl;
 					Gotoxy(15, 101);
 					std::cout << ANSI_COLOR_RESET "[아니오]  " << std::endl;
+
 
 					while (true) // ESC를 눌러서 나갈 때까지 반복한다.
 					{
